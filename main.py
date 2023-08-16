@@ -4,8 +4,12 @@ import pygame
 pygame.init()
 
 # Initializing Pygame Essential Variable
-screen = pygame.display.set_mode((1280, 720))
+S_WIDTH, S_HEIGHT = 700, 700
+screen = pygame.display.set_mode((S_WIDTH, S_HEIGHT))
 clock = pygame.time.Clock()
 FPS = 60
 
-if __name__ == "__main__":
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
