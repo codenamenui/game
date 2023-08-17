@@ -26,7 +26,7 @@ y_running_counter = 0
 idle_counter = 0
 
 # Speed of Char
-speed = 5
+speed = 23
 
 # Flip
 right = False
@@ -49,7 +49,7 @@ while True:
 
     # Drawing Player
     screen.blit(playerSurf, (x, y))
-    # player.display(screen, S_WIDTH, S_HEIGHT)
+    player.display(screen, S_WIDTH, S_HEIGHT)
     
     # Counters
     if keys[pygame.K_d] or keys[pygame.K_a]:
@@ -76,13 +76,13 @@ while True:
     # Player Movement
     if keys[pygame.K_a] and keys[pygame.K_d]:
         idle = True
-    elif x > speed and keys[pygame.K_a]:
+    elif keys[pygame.K_a]:
         x -= speed
         left = True
         right = False
         up = False
         down = False
-    elif x <= S_WIDTH - 18 and keys[pygame.K_d]:
+    elif keys[pygame.K_d]:
         x += speed
         right = True
         left = False
@@ -91,18 +91,28 @@ while True:
 
     if keys[pygame.K_s] and keys[pygame.K_w]:
         idle = True
-    elif y > speed and keys[pygame.K_s]:
+    elif keys[pygame.K_s]:
         y += speed
         down = True
         up = False
         left = False
         right = False
-    elif y <= S_HEIGHT - 24 and keys[pygame.K_w]:
+    elif keys[pygame.K_w]:
         y -= speed
         up = True
         down = False
         left = False
         right = False
+
+    if x >= S_WIDTH - 18:
+        x = S_WIDTH - 18
+    elif x < 0:
+        x = 0 
+
+    if y >= S_HEIGHT - 24:
+        y = S_HEIGHT - 24
+    elif y < 0:
+        y = 0
 
     # Player Sprite
     playerSurf.fill(empty)

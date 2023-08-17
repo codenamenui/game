@@ -17,12 +17,12 @@ class Entities:
         self.current_health = health
 
     def display(self, screen, width, height):
-        rect = pygame.Rect(0, 0, 500, 50)
+        rect = pygame.Rect(0, 0, 500, 40)
         rect.center = (width//2, height - 100)
         pygame.draw.rect(screen, 'purple', rect)
-        pygame.draw.rect(screen, 'black', rect, 2)
-        health_text = font(32).render(f'{self.current_health}/{self.health}', True, 'black')
-        screen.blit(health_text, health_text.get_rect(center=rect.center))
+        pygame.draw.rect(screen, 'black', rect, 1)
+        health_text = font(30).render(f'{self.current_health}/{self.health}', True, 'black')
+        screen.blit(health_text, health_text.get_rect(center=(rect.center[0], rect.center[1] - 2)))
 
 class Monsters(Entities):
 
