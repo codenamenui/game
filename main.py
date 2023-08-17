@@ -1,5 +1,6 @@
 import pygame
 import sys
+from Class import *
 
 # Initializing Pygame
 pygame.init()
@@ -11,7 +12,7 @@ clock = pygame.time.Clock()
 FPS = 60
     
 # Player Sprite
-player_sprite_sheet = pygame.image.load("sprites/characters/player.png")
+player_sprite_sheet = pygame.image.load("assets/sprites/characters/player.png")
 playerSurf = pygame.Surface((18, 24), pygame.SRCALPHA)
 playerSurf.set_colorkey((255,0,255))
 playerSurf.blit(player_sprite_sheet, (0, 0), (16, 20 + 48 * 0, 18, 24))
@@ -36,6 +37,9 @@ down = True
 # Pos
 x, y = S_WIDTH//2 - 9, S_HEIGHT//2 - 12
 
+# Player
+player = Player('Yooo')
+
 while True:
     # 
     screen.fill('gray')
@@ -45,7 +49,8 @@ while True:
 
     # Drawing Player
     screen.blit(playerSurf, (x, y))
-
+    # player.display(screen, S_WIDTH, S_HEIGHT)
+    
     # Counters
     if keys[pygame.K_d] or keys[pygame.K_a]:
         idle = False
