@@ -21,20 +21,45 @@ player.components['sprite'] = SpriteComponent(path("sprites/characters/player.pn
                                               18, 24, (48, 48), (16, 20))
 player.components['movement']= MovementComponent(5)
 
+frame = 'explore'
 while True:
 
-    screen.fill('gray')
-    
-    # Keys
-    keys = pygame.key.get_pressed()
+    while frame == 'menu':
+        screen.fill('gray')
 
-    # Drawing Player
-    player.display(keys, screen, S_WIDTH, S_HEIGHT)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+        clock.tick(FPS)
+        pygame.display.flip()
 
-    clock.tick(FPS)
-    pygame.display.flip()
+    while frame == 'explore':
+        screen.fill('gray')
+        
+        # Keys
+        keys = pygame.key.get_pressed()
+
+        # Drawing Player
+        player.display(keys, screen, S_WIDTH, S_HEIGHT)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        clock.tick(FPS)
+        pygame.display.flip()
+
+    while frame == 'battle':
+
+        screen.fill('gray')
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        clock.tick(FPS)
+        pygame.display.flip()

@@ -5,10 +5,10 @@ class Entities:
     def __init__(self, name, health, attack, agility, defense):
         self.name = name
         self.health = health
+        self.current_health = health
         self.attack = attack
         self.agility = agility
         self.defense = defense
-        self.current_health = health
 
 class SpriteComponent:
     def __init__(self, path, x, y, width, height, offset, initial):
