@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 import random
-from buf import *
+from Class import *
 from functions import path
 
 # Initializing Pygame
