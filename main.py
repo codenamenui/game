@@ -2,7 +2,7 @@ import pygame
 import sys
 import os
 import random
-from Class import Player, SpriteComponent, Entities, Monsters
+from Class import *
 from functions import path
 
 # Initializing Pygame
@@ -23,6 +23,7 @@ player.components['Sprite'] = SpriteComponent(path("sprites/characters/player.pn
 while True:
 
     screen.fill('gray')
+    
     # Keys
     keys = pygame.key.get_pressed()
 
