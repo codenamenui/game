@@ -19,13 +19,10 @@ class Entities:
                 if random.random() < self.components['crit'].combo_rate:
                     combo = False
                 if random.random() < self.components['crit'].crit_rate:
-                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) 
-                           * self.components['crit'].crit_dmg
+                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) * self.components['crit'].crit_dmg
                 else: 
-                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) 
-                           * self.components['crit'].crit_dmg
+                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) * self.components['crit'].crit_dmg
             enemy.current_hp -= dmg
-            
         else:
             enemy.current_hp -= int(self.attack * (400 / (400 + self.defense + 100)))
 
