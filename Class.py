@@ -5,10 +5,39 @@ class Entities:
     def __init__(self, name, health, attack, agility, defense):
         self.name = name
         self.health = health
-        self.current_health = health
+        self.current_hp = health * 10
+        self.overall_hp = health * 10
         self.attack = attack
         self.agility = agility
         self.defense = defense
+
+    def launch_atk(self, enemy):
+        if hasattr(self, 'components'):
+            dmg = 0
+            combo = True
+            while combo:
+                if random.random() < self.components['crit'].combo_rate:
+                    combo = False
+                if random.random() < self.components['crit'].crit_rate:
+                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) 
+                           * self.components['crit'].crit_dmg
+                else: 
+                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) 
+                           * self.components['crit'].crit_dmg
+            enemy.current_hp -= dmg
+            
+        else:
+            enemy.current_hp -= int(self.attack * (400 / (400 + self.defense + 100)))
+
+    def display_health(self, screen, S_WIDTH, S_HEIGHT, offset = 100):
+        rect = pygame.Rect(0, 0, (500 * (self.current_hp/self.overall_hp)), 40)
+        outline_rect = pygame.Rect(0, 0, 500, 40)
+        rect.midleft = (100, S_HEIGHT - offset)
+        outline_rect.center = (S_WIDTH//2, S_HEIGHT - offset)
+        pygame.draw.rect(screen, 'purple', rect)
+        pygame.draw.rect(screen, 'black', outline_rect, 1)
+        health_text = font(30).render(f'{self.current_hp}/{self.overall_hp}', True, 'black')
+        screen.blit(health_text, health_text.get_rect(center=(outline_rect.center)))
 
 class SpriteComponent:
     def __init__(self, path, x, y, width, height, offset, initial):
@@ -30,11 +59,20 @@ class SpriteComponent:
 
 class CollisionComponent:
     def __init__(self):
-        pass
+        pas
 
 class CritComponent:
-    def __init__(self):
-        pass
+    def __init__(self, add_stats=[]):
+        if add_stats == []:
+            self.luck = 0
+            self.combo_rate = 0.01
+            self.crit_rate = 0.01
+            self.crit_dmg = 1.5
+        else:
+            self.luck = add_stats[0]
+            self.combo_rate = add_stats[1]
+            self.crit_rate = add_stats[2]
+            self.crit_dmg = add_stats[3]
 
 class MovementComponent:
     def __init__(self, speed):
@@ -145,8 +183,7 @@ class ShopComponent:
 class Player(Entities):
     def __init__(self, 
                  name,
-                 stats=[], 
-                 add_stats=[]):
+                 stats=[]):
 
         self.components = {}
 
@@ -155,19 +192,38 @@ class Player(Entities):
         else:
             Entities.__init__(self, name, *stats)
 
-        if add_stats == []:
-            self.luck = 0
-            self.combo_rate = 1
-            self.crit_rate = 1
-            self.crit_dmg = 2
-        else:
-            self.luck = add_stats[0]
-            self.combo_rate = add_stats[1]
-            self.crit_rate = add_stats[2]
-            self.crit_dmg = add_stats[3]
-
     def display(self, keys, screen, S_WIDTH, S_HEIGHT):
         self.components['movement'].counter(keys)
         self.components['movement'].move(self.components['sprite'], keys, S_WIDTH, S_HEIGHT)
         args = self.components['movement'].animation()
         self.components['sprite'].display_sprite(screen, *args)
+
+class Monster(Entities):
+
+    # Scaling = (health, attack, agility, defense)
+    monster_types = {
+        1 : ((3, 0.5, 1, 2), (1, 10), 'Slime'),
+        2 : ((2, 1.5, 1, 2), (10, 20), 'Goblin')
+    }
+
+    def __init__(self, m_type):
+        self.lvl = random.randint(*(self.monster_types[m_type][1]))
+        stat_points = (self.lvl) * 4
+        scaling = self.monster_types[m_type][0]
+        scaling_overall = sum(scaling)
+        health = int(round(stat_points * scaling[0] / scaling_overall, 0))
+        attack = int(round(stat_points * scaling[1] / scaling_overall, 0))
+        agility = int(round(stat_points * scaling[2] / scaling_overall, 0))
+        defense = int(round(stat_points * scaling[3] / scaling_overall, 0))
+        super().__init__(self.monster_types[m_type][2], health, attack, agility, defense)
+
+    def __str__(self):
+        return f'''MONSTER : {self.name}
+        LVL : {self.lvl}
+        HEALTH : {self.health}
+        ATTACK : {self.attack}
+        AGILITY : {self.agility}
+        DEFENSE : {self.defense}
+        REAL STAT : {self.lvl * 4}
+        ACTUAL STAT : {sum([self.health, self.attack, self.agility, self.defense])}
+        '''
