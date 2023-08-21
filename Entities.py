@@ -5,11 +5,21 @@ class Entities:
     def __init__(self, name, health, attack, agility, defense):
         self.name = name
         self.health = health
-        self.current_hp = health * 10
-        self.overall_hp = health * 10
+        self.current_hp = health * 1
+        self.overall_hp = health * 1
         self.attack = attack
         self.agility = agility
         self.defense = defense
+
+    @property
+    def health_property(self):
+        return self.health
+
+    @health_property.setter
+    def health_property(self, value):
+        self.health = value
+        self.current_hp = self.health
+        self.overall_hp = self.current_hp
 
     def launch_atk(self, enemy):
         if 'crit' in self.components:
@@ -42,7 +52,6 @@ class SpriteComponent:
         self.x, self.y = x, y
         self.width, self.height = width, height
         self.charSurf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        # self.charSurf = pygame.Surface((self.width, self.height))
         self.offset_x, self.offset_y = offset[0], offset[1]
         self.initial_x, self.initial_y = initial[0], initial[1]
 
@@ -64,7 +73,7 @@ class SpriteComponent:
 
 class CollisionComponent:
     def __init__(self):
-        pas
+        pass
 
 class CritComponent:
     def __init__(self, add_stats=[]):
@@ -195,7 +204,7 @@ class ShopComponent:
 class EncounterComponent:
     def __init__(self):
         self.encounter_speed = 2
-        self.encounter_max = 100
+        self.encounter_max = 10
         self.gauge = 0
 
     def check(self, player):
@@ -214,11 +223,12 @@ class EncounterComponent:
 class Player(Entities):
     def __init__(self, 
                  name,
+                 lvl,
                  stats=[]):
 
         self.components = {}
         self.turn = True
-        # self.lvl = lvl
+        self.lvl = lvl
         # self.exp = exp
 
         if stats == []:
@@ -240,20 +250,10 @@ class Player(Entities):
 
 class Monster(Entities):
 
-    # Scaling = (health, attack, agility, defense)
-    monster_types = {
-        1 : ((3, 0.5, 1, 2), (1, 10), 'Slime', SpriteComponent(path("sprites/characters/slime.png"), 
-                                               450, 600 , 20,
-                                               20, (32, 30), (6, 6))),
-        2 : ((2, 1.5, 1, 2), (10, 20), 'Goblin', SpriteComponent(path("sprites/characters/slime.png"), 
-                                               450, 600 , 20,
-                                               20, (32, 30), (6, 6)))
-    }
-
     types = {
         1 : {
                 'scaling' : (3, 0.5, 1, 2),
-                'lvlrange' : (1, 10),
+                'lvlrange' : (100, 1000),
                 'name' : 'Slime',
                 'sprite' : SpriteComponent(path("sprites/characters/slime.png"), 
                                            450, 600 , 20,
@@ -263,7 +263,7 @@ class Monster(Entities):
             },
         2 : {
                 'scaling' : (2, 1.5, 1, 2),
-                'lvlrange' : (10, 20),
+                'lvlrange' : (1000, 2000),
                 'name' : 'Goblin',
                 'sprite' : SpriteComponent(path("sprites/characters/slime.png"), 
                                            450, 600 , 20,

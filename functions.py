@@ -11,4 +11,3 @@ def path(path):
     for f in path.split("/"):
         file_path = os.path.join(file_path, f)
     return file_path
-
