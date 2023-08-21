@@ -1,5 +1,5 @@
 import pygame, random, os
-from functions import font
+from functions import *
 
 class Entities:
     def __init__(self, name, health, attack, agility, defense):
@@ -12,16 +12,16 @@ class Entities:
         self.defense = defense
 
     def launch_atk(self, enemy):
-        if hasattr(self, 'components'):
+        if 'crit' in self.components:
             dmg = 0
             combo = True
             while combo:
                 if random.random() < self.components['crit'].combo_rate:
                     combo = False
                 if random.random() < self.components['crit'].crit_rate:
-                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) * self.components['crit'].crit_dmg
+                    dmg += int(self.attack * (400 / (400 + self.defense))) * self.components['crit'].crit_dmg
                 else: 
-                    dmg += int(self.attack * (400 / (400 + self.defense + 100))) * self.components['crit'].crit_dmg
+                    dmg += int(self.attack * (400 / (400 + self.defense))) * self.components['crit'].crit_dmg
             enemy.current_hp -= dmg
         else:
             enemy.current_hp -= int(self.attack * (400 / (400 + self.defense + 100)))
@@ -41,18 +41,26 @@ class SpriteComponent:
         self.sprite_sheet = pygame.image.load(path)
         self.x, self.y = x, y
         self.width, self.height = width, height
-        self.playerSurf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.charSurf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        # self.charSurf = pygame.Surface((self.width, self.height))
         self.offset_x, self.offset_y = offset[0], offset[1]
         self.initial_x, self.initial_y = initial[0], initial[1]
 
     def display_sprite(self, screen, sprite_y, counter, flip):
         empty = pygame.Color(0, 0, 0, 0)
-        self.playerSurf.fill(empty)
-        self.playerSurf.blit(self.sprite_sheet, (0, 0), ((self.initial_x + (counter//10) * self.offset_x), 
+        self.charSurf.fill(empty)
+        self.charSurf.blit(self.sprite_sheet, (0, 0), ((self.initial_x + (counter//10) * self.offset_x), 
                              self.initial_y + self.offset_y * sprite_y, self.width, self.height))
         if flip:
-            self.playerSurf = pygame.transform.flip(self.playerSurf, True, False)
-        screen.blit(self.playerSurf, (self.x, self.y))
+            self.charSurf = pygame.transform.flip(self.charSurf, True, False)
+        screen.blit(self.charSurf, (self.x, self.y))
+
+    def battle_sprite(self, screen, sprite_y, counter, x, y):
+        empty = pygame.Color(0, 0, 0, 0)
+        self.charSurf.fill(empty)
+        self.charSurf.blit(self.sprite_sheet, (0, 0), ((self.initial_x + (counter//10) * self.offset_x), 
+                           self.initial_y + self.offset_y * sprite_y, self.width, self.height))
+        screen.blit(self.charSurf, (x, y))
 
 class CollisionComponent:
     def __init__(self):
@@ -77,6 +85,13 @@ class MovementComponent:
         self.x_running_counter = 0
         self.y_running_counter = 0
         self.idle_counter = 0
+        self.idle = True
+        self.down = True
+        self.up = False
+        self.left = False
+        self.right = False
+
+    def set_default(self):
         self.idle = True
         self.down = True
         self.up = False
@@ -177,42 +192,101 @@ class ShopComponent:
     def __init__(self):
         pass
 
+class EncounterComponent:
+    def __init__(self):
+        self.encounter_speed = 2
+        self.encounter_max = 100
+        self.gauge = 0
+
+    def check(self, player):
+        if not player.components['movement'].idle:
+            self.gauge += self.encounter_speed
+            if self.gauge >= self.encounter_max:
+                player.components['movement'].set_default()
+                self.gauge = 0
+                return True
+        return False
+
+    def display_encounter(self, screen):
+        pygame.draw.rect(screen, 'orange', (50, 600, (self.gauge/self.encounter_max * 600), 50))
+        pygame.draw.rect(screen, 'black', (50, 600, 600, 50), 1)
+
 class Player(Entities):
     def __init__(self, 
                  name,
                  stats=[]):
 
         self.components = {}
+        self.turn = True
+        # self.lvl = lvl
+        # self.exp = exp
 
         if stats == []:
             Entities.__init__(self, name, 0, 0, 0, 0)
         else:
             Entities.__init__(self, name, *stats)
 
-    def display(self, keys, screen, S_WIDTH, S_HEIGHT):
+    def display_explore(self, keys, screen, S_WIDTH, S_HEIGHT):
         self.components['movement'].counter(keys)
         self.components['movement'].move(self.components['sprite'], keys, S_WIDTH, S_HEIGHT)
         args = self.components['movement'].animation()
         self.components['sprite'].display_sprite(screen, *args)
 
+    def display_battle(self, screen, S_WIDTH, S_HEIGHT):
+        self.components['movement'].counter({pygame.K_a : False, pygame.K_d : False,
+                                             pygame.K_s : False, pygame.K_w : False})
+        args = self.components['movement'].animation()
+        self.components['sprite'].battle_sprite(screen, args[0], args[1], S_WIDTH//2, S_HEIGHT - 200)
+
 class Monster(Entities):
 
     # Scaling = (health, attack, agility, defense)
     monster_types = {
-        1 : ((3, 0.5, 1, 2), (1, 10), 'Slime'),
-        2 : ((2, 1.5, 1, 2), (10, 20), 'Goblin')
+        1 : ((3, 0.5, 1, 2), (1, 10), 'Slime', SpriteComponent(path("sprites/characters/slime.png"), 
+                                               450, 600 , 20,
+                                               20, (32, 30), (6, 6))),
+        2 : ((2, 1.5, 1, 2), (10, 20), 'Goblin', SpriteComponent(path("sprites/characters/slime.png"), 
+                                               450, 600 , 20,
+                                               20, (32, 30), (6, 6)))
     }
 
-    def __init__(self, m_type):
-        self.lvl = random.randint(*(self.monster_types[m_type][1]))
+    types = {
+        1 : {
+                'scaling' : (3, 0.5, 1, 2),
+                'lvlrange' : (1, 10),
+                'name' : 'Slime',
+                'sprite' : SpriteComponent(path("sprites/characters/slime.png"), 
+                                           450, 600 , 20,
+                                           20, (32, 30), (6, 6)),
+                'frames' : 6,
+                'y' : 1
+            },
+        2 : {
+                'scaling' : (2, 1.5, 1, 2),
+                'lvlrange' : (10, 20),
+                'name' : 'Goblin',
+                'sprite' : SpriteComponent(path("sprites/characters/slime.png"), 
+                                           450, 600 , 20,
+                                           20, (32, 30), (6, 6)),
+                'frames' : 6,
+                'y' : 1
+            }
+    }
+
+    def __init__(self, t):
+        self.components = {'sprite' : self.types[t]['sprite']}
+        self.lvl = random.randint(*(self.types[t]['lvlrange']))
         stat_points = (self.lvl) * 4
-        scaling = self.monster_types[m_type][0]
+        scaling = self.types[t]['scaling']
         scaling_overall = sum(scaling)
         health = int(round(stat_points * scaling[0] / scaling_overall, 0))
         attack = int(round(stat_points * scaling[1] / scaling_overall, 0))
         agility = int(round(stat_points * scaling[2] / scaling_overall, 0))
         defense = int(round(stat_points * scaling[3] / scaling_overall, 0))
-        super().__init__(self.monster_types[m_type][2], health, attack, agility, defense)
+        super().__init__(self.types[t]['name'], health, attack, agility, defense)
+        self.counter = 0
+        self.frames = self.types[t]['frames']
+        self.sprite_y = self.types[t]['y']
 
     def __str__(self):
         return f'''MONSTER : {self.name}
@@ -224,3 +298,13 @@ class Monster(Entities):
         REAL STAT : {self.lvl * 4}
         ACTUAL STAT : {sum([self.health, self.attack, self.agility, self.defense])}
         '''
+
+    def animation(self):
+        self.counter += 1
+        if self.counter > self.frames * 10 - 1:
+            self.counter = 0
+
+    def display_battle(self, screen, S_WIDTH, S_HEIGHT):
+        self.animation()
+        self.components['sprite'].battle_sprite(screen, self.sprite_y, self.counter, 
+                                                S_WIDTH//2, S_HEIGHT - 500)
