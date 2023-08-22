@@ -2,7 +2,12 @@ Goals for Today (08/21/23)
 
 - Stats Screen - DONE
 - Proper Stats System - DONE
-- Turn Base Attacks 
-- Use for Agility
+- Turn Base Attacks - DONE
+- Use for Agility - DONE
+- Equipment System
+- Shop System
+
+Goals for Today (08/22/23)
+
 - Equipment System
 - Shop System
